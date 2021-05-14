@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% comment %} 
+{%block content%}
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" style="margin-top: 20px;">
+      <strong>{{message}}</strong>
+      <button class="close" type="button" data-dismiss="alert" role="alert">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% if not cart.products.count %}
+  <h3 class="text-center mt-5 mb-5">Ваша корзина пуста!</h3>
+{% else %}
+  <h3 class="text-center mt-5 mb-5">Корзина</h3>
+{%endif%}
+
+{%if cart.products.count%}
+<table class="table" style="margin-bottom: 20px;">
+  <thead>
+    <tr>
+      <th scope="col">Наименование</th>
+      <th scope="col">Изображение</th>
+      <th scope="col">Цена</th>
+      <th scope="col">Кол-ва</th>
+      <th scope="col">Общая цена</th>
+      <th scope="col">Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%for product in cart.products.all%}
+        <tr>
+          <th scope="row"><a href="{{ product.content_object.get_url }}">{{ product.content_object.title }}</a></th>
+          <td class="w-25"><img class="img-fluid" src="{{ product.content_object.image.url }}" alt=""></td>
+          <td>{{product.content_object.price}}</td>
+            {% comment %} <form action="{% url 'change_quantity' ct_model=product.content_object.get_model_name slug=product.content_object.slug %}" method="POST">
+              {% csrf_token %}
+              <input type="number" class="form-control" name="quantity" style="max-width: 70px;" min="1" value="{{ product.quantity }}">
+              <input type="submit" class="btn btn-primary" value="Изменить">
+            </form> 
+          <td>{{product.quantity}}</td>
+          <td>{{product.final_price}}</td>
+          <td>
+            <a href="{% url 'delete_from_cart' ct_model=product.content_object.get_model_name slug=product.content_object.slug %}"><buttom class="btn btn-danger">Удалить из корзины</buttom></a>
+          </td>
+        </tr>
+    {%endfor%}
+    <tr>
+      <td colspan = "2"> </td>
+      <th  scope = "row"> Итого: </th>
+      <td > {{cart.total_products}} </td>
+      <td><strong> {{cart.final_price}} тнг. </strong></td>
+      <td><a href="{% url 'chechout' %}"><button class="btn btn-primary">Перейти к оформлению</button></a></td>
+    </tr>
+  </tbody>
+</table>
+{%endif%}
+{%endblock content%} {% endcomment %}
+
+
+{% block content %}
+<h3 class="text-center mt-5 mb-5">Ваша корзина {% if not cart.products.count %}пуста{% endif %}</h3>
+{% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>{{ message }}</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+{% endif %}
+{% if cart.products.count %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Наименование</th>
+      <th scope="col">Изображение</th>
+      <th scope="col">Цена</th>
+      <th scope="col">Кол-во</th>
+        <th scope="col">Общая цена</th>
+      <th scope="col">Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in cart.products.all %}
+        <tr>
+          <th scope="row">{{ item.content_object.title }}</th>
+          <td class="w-25"><img src="{{ item.content_object.image.url }}" class="img-fluid"></td>
+          <td>{{ item.content_object.price }} тнг.</td>
+          <td>
+            <form action="{% url 'change_quantity' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}" method="POST">
+              {% csrf_token %}
+              <input type="number" class="form-control" name="quantity" style="width: 70px;" min="1" value="{{ item.quantity }}">
+              <br>
+              <input type="submit" class="btn btn-primary" value="Изменить кол-во">
+            </form>
+          </td>
+            <td>{{ item.final_price }} тнг.</td>
+          <td>
+            <a href="{% url 'delete_from_cart' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}"><button class="btn btn-danger">Удалить из корзины</button></a>
+          </td>
+        </tr>
+    {% endfor %}
+        <tr>
+          <td colspan="2"></td>
+          <td>Итого:</td>
+          <td>{{ cart.total_products }}</td>
+          <td><strong>{{ cart.final_price }} тнг.</strong></td>
+          <td><a href="{% url 'chechout' %}"><button class="btn btn-primary">Перейти к оформлению</button></a></td>
+        </tr>
+  </tbody>
+</table>
+{% endif %}
+{% endblock content %}
